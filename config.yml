@@ -1,3 +1,5 @@
 # path to the Postgres versions
 versions:
-  "9.4": /usr/local/Cellar/postgresql/9.4.4/bin
+  "9.5": /usr/local/Cellar/postgresql/9.4.5/bin
+
+

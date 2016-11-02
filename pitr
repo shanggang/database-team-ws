@@ -23,7 +23,7 @@ command_line_args = parser.parse_args()
 config = yaml.load(open('config.yml', 'r').read())
 
 # Find the source directory and extract the Postgres version
-source_data_directory = command_line_args.source or raw_input('Source data directory: ')
+source_data_directory = command_line_args.source or input('Source data directory: ')
 try:
     database_version = open('%s/PG_VERSION' % source_data_directory, 'r').read().strip()
 except IOError:
@@ -34,14 +34,15 @@ except IOError:
 bin_path = config['versions'][database_version]
 
 # Source the WAL archive
-wal_archive = command_line_args.wal or raw_input('Source wal archive: ')
+wal_archive = command_line_args.wal or input('Source wal archive: ')
 
 # Format the destination time properly
-dest_time = command_line_args.time or raw_input('Restore time UTC (YYYY-mm-dd HH:MM:SS): ')
+dest_time = command_line_args.time or input('Restore time UTC (YYYY-mm-dd HH:MM:SS): ')
 dest_time = time.strptime(dest_time, '%Y-%m-%d %H:%M:%S')
 
 # Build the destination directory
-dest_data_directory = command_line_args.destination or raw_input('Destination data directory: ')
+
+dest_data_directory = command_line_args.destination or input('Destination data directory: ')
 os.makedirs(dest_data_directory)
 os.system("chmod 700 %s" % dest_data_directory)
 
@@ -82,7 +83,8 @@ recovery_conf.write(template.format(target_time=time.strftime('%Y-%m-%dT%H:%M:%S
 recovery_conf.close()
 
 # start postgresql
-if subprocess.call("exit 1", shell=True) != 0:
+print ("/usr/pgsql-9.5/bin/postgres -D %s" % dest_data_directory)
+if subprocess.call("/usr/pgsql-9.5/bin/postgres -D %s" % dest_data_directory , shell=True) != 0:
     logging.fatal("Error running Postgres")
     sys.exit(1)
 
@@ -91,7 +93,7 @@ if subprocess.call("exit 1", shell=True) != 0:
 # start Postgres if selected
 if command_line_args.auto_start:
     try:
-        process = subprocess.Popen("exit 1", shell=True)
+        process = subprocess.Popen("/usr/pgsql-9.5/bin/postgres -D %s" % dest_data_directory, shell=True)
         process.wait()
     except:
         process.send_signal(signal.SIGTERM)
